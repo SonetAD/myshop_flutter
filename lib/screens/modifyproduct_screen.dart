@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:myshop/providers/products_providers.dart';
+import 'package:provider/provider.dart';
 
 class ModifyProductScreen extends StatefulWidget {
   static const routeName = '/modifyProductScreen';
@@ -11,6 +13,14 @@ class ModifyProductScreen extends StatefulWidget {
 class _ModifyProductScreenState extends State<ModifyProductScreen> {
   final _imgUrlController = TextEditingController();
   final _focus = FocusNode();
+  final _form = GlobalKey<FormState>();
+  final _formData = {
+    'id': DateTime.now().toString(),
+    'title': 'test',
+    'price': 0.0,
+    'description': 'test',
+    'imgUrl': 'test'
+  };
 
   @override
   void initState() {
@@ -27,39 +37,76 @@ class _ModifyProductScreenState extends State<ModifyProductScreen> {
   }
 
   void handleFocus() {
-    if (!_focus.hasFocus) {
-      setState(() {});
+    setState(() {});
+  }
+
+  void _save(ProductData productData) {
+    if (_form.currentState!.validate()) {
+      _form.currentState!.save();
+      productData.add(
+        id: _formData['id'] as String,
+        title: _formData['title'] as String,
+        price: _formData['price'] as double,
+        imgUrl: _formData['imgUrl'] as String,
+        description: _formData['description'] as String,
+      );
     }
   }
 
-  void _save() {}
+  String? _validate(String? val) {
+    if (val == '') {
+      return 'This field is required';
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
+    ProductData productData = Provider.of<ProductData>(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Edit Product'),
-        actions: [IconButton(onPressed: _save, icon: const Icon(Icons.check))],
+        actions: [
+          IconButton(
+              onPressed: () => _save(productData),
+              icon: const Icon(Icons.check))
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(15.0),
         child: FocusScope(
           child: Form(
+            key: _form,
             child: ListView(
               children: [
                 TextFormField(
                   decoration: const InputDecoration(labelText: 'Title'),
                   textInputAction: TextInputAction.next,
+                  validator: _validate,
+                  onSaved: (val) {
+                    _formData['title'] = val as String;
+                  },
                 ),
                 TextFormField(
                   decoration: const InputDecoration(labelText: 'Title'),
                   textInputAction: TextInputAction.next,
                   keyboardType: TextInputType.number,
+                  validator: _validate,
+                  onSaved: (val) {
+                    if (val != '') {
+                      double modVal = double.parse(val as String).toDouble();
+                      _formData['price;e'] = modVal;
+                    }
+                  },
                 ),
                 TextFormField(
                   decoration: const InputDecoration(labelText: 'Description'),
                   maxLines: 3,
                   keyboardType: TextInputType.multiline,
+                  validator: _validate,
+                  onSaved: (val) {
+                    _formData['description'] = val as String;
+                  },
                 ),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
@@ -87,8 +134,12 @@ class _ModifyProductScreenState extends State<ModifyProductScreen> {
                         textInputAction: TextInputAction.done,
                         decoration: const InputDecoration(labelText: 'Url'),
                         focusNode: _focus,
+                        validator: _validate,
+                        onSaved: (val) {
+                          _formData['imgUrl'] = val as String;
+                        },
                         onFieldSubmitted: (_) {
-                          setState(() {});
+                          _save(productData);
                         },
                       ),
                     ),

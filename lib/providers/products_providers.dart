@@ -57,4 +57,19 @@ class ProductData with ChangeNotifier {
   Product findProduct(String id) {
     return _products.firstWhere((item) => item.id == id);
   }
+
+  void add(
+      {required String id,
+      required String title,
+      required double price,
+      required String imgUrl,
+      required String description}) {
+    _products.add(Product(
+        id: id,
+        title: title,
+        description: description,
+        price: price,
+        imgUrl: imgUrl));
+    notifyListeners();
+  }
 }
