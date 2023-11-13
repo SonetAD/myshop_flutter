@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 class ModifyProductScreen extends StatefulWidget {
   static const routeName = '/modifyProductScreen';
+
   const ModifyProductScreen({super.key});
 
   @override
@@ -40,16 +41,32 @@ class _ModifyProductScreenState extends State<ModifyProductScreen> {
     setState(() {});
   }
 
-  void _save(ProductData productData) {
+  void _save(ProductData productData, int? index) {
     if (_form.currentState!.validate()) {
       _form.currentState!.save();
-      productData.add(
-        id: _formData['id'] as String,
-        title: _formData['title'] as String,
-        price: _formData['price'] as double,
-        imgUrl: _formData['imgUrl'] as String,
-        description: _formData['description'] as String,
-      );
+      if (index == null) {
+        productData.add(
+          id: _formData['id'] as String,
+          title: _formData['title'] as String,
+          price: _formData['price'] as double,
+          imgUrl: _formData['imgUrl'] as String,
+          description: _formData['description'] as String,
+        );
+      } else {
+        productData.edit(
+          index: index,
+          id: _formData['id'] as String,
+          title: _formData['title'] as String,
+          price: _formData['price'] as double,
+          imgUrl: _formData['imgUrl'] as String,
+          description: _formData['description'] as String,
+        );
+      }
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('New product added'),
+        duration: Duration(seconds: 1),
+      ));
     }
   }
 
@@ -63,12 +80,13 @@ class _ModifyProductScreenState extends State<ModifyProductScreen> {
   @override
   Widget build(BuildContext context) {
     ProductData productData = Provider.of<ProductData>(context);
+    Map data = ModalRoute.of(context)!.settings.arguments as Map;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Edit Product'),
+        title: Text(data['appBarTitle']),
         actions: [
           IconButton(
-              onPressed: () => _save(productData),
+              onPressed: () => _save(productData, data['data']?['index']),
               icon: const Icon(Icons.check))
         ],
       ),
@@ -80,6 +98,7 @@ class _ModifyProductScreenState extends State<ModifyProductScreen> {
             child: ListView(
               children: [
                 TextFormField(
+                  initialValue: data['data']?['title'],
                   decoration: const InputDecoration(labelText: 'Title'),
                   textInputAction: TextInputAction.next,
                   validator: _validate,
@@ -88,7 +107,8 @@ class _ModifyProductScreenState extends State<ModifyProductScreen> {
                   },
                 ),
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Title'),
+                  initialValue: data['data']?['price'].toString(),
+                  decoration: const InputDecoration(labelText: 'Price'),
                   textInputAction: TextInputAction.next,
                   keyboardType: TextInputType.number,
                   validator: _validate,
@@ -100,6 +120,7 @@ class _ModifyProductScreenState extends State<ModifyProductScreen> {
                   },
                 ),
                 TextFormField(
+                  initialValue: data['data']?['description'],
                   decoration: const InputDecoration(labelText: 'Description'),
                   maxLines: 3,
                   keyboardType: TextInputType.multiline,
@@ -129,8 +150,10 @@ class _ModifyProductScreenState extends State<ModifyProductScreen> {
                     ),
                     Expanded(
                       child: TextFormField(
+                        initialValue: data['data']?['url'],
                         keyboardType: TextInputType.url,
-                        controller: _imgUrlController,
+                        controller:
+                            data['data'] == null ? _imgUrlController : null,
                         textInputAction: TextInputAction.done,
                         decoration: const InputDecoration(labelText: 'Url'),
                         focusNode: _focus,
@@ -139,7 +162,7 @@ class _ModifyProductScreenState extends State<ModifyProductScreen> {
                           _formData['imgUrl'] = val as String;
                         },
                         onFieldSubmitted: (_) {
-                          _save(productData);
+                          _save(productData, data['data']?['index']);
                         },
                       ),
                     ),

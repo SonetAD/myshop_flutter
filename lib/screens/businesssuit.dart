@@ -20,7 +20,11 @@ class BusinessSuitScreen extends StatelessWidget {
         actions: [
           IconButton(
               onPressed: () {
-                Navigator.of(context).pushNamed(ModifyProductScreen.routeName);
+                Navigator.of(context)
+                    .pushNamed(ModifyProductScreen.routeName, arguments: {
+                  'appBarTitle': 'Add Product',
+                  'data': null,
+                });
               },
               icon: const Icon(Icons.add))
         ],
@@ -31,7 +35,12 @@ class BusinessSuitScreen extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               const Divider(),
-              SingleBusinessItem(products[index].title, products[index].imgUrl),
+              SingleBusinessItem(
+                  index: index,
+                  title: products[index].title,
+                  url: products[index].imgUrl,
+                  price: products[index].price,
+                  description: products[index].description)
             ],
           );
         },

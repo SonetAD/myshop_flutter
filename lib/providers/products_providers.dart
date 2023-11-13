@@ -72,4 +72,26 @@ class ProductData with ChangeNotifier {
         imgUrl: imgUrl));
     notifyListeners();
   }
+
+  void edit({
+    required int index,
+    required String id,
+    required String title,
+    required double price,
+    required String imgUrl,
+    required String description,
+  }) {
+    _products[index] = Product(
+        id: id,
+        title: title,
+        description: description,
+        price: price,
+        imgUrl: imgUrl);
+    notifyListeners();
+  }
+
+  void remove(int index) {
+    _products.removeAt(index);
+    notifyListeners();
+  }
 }
